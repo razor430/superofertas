@@ -17,11 +17,11 @@
  */
 
 /** URL del backend de scraping (definida por VITE_API_URL). */
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.trim() ?? '';
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined)?.trim() ?? ''; // vacío = mismo origen
 
 /** Lanza un error claro si no hay backend configurado. */
 function requireApiUrl(): void {
-  if (!API_URL) {
+  if (false) { // vacío = mismo origen: no lanzar, la API está en /api del mismo dominio
     throw new Error(
       'El backend de scraping no está configurado. Definí la variable VITE_API_URL.',
     );
@@ -62,7 +62,7 @@ export async function searchProducts(
  */
 export async function fetchSuggestions(prefix: string): Promise<string[]> {
   if (!prefix.trim()) return [];
-  if (!API_URL) return [];
+  
   try {
     const qs = new URLSearchParams({ query: prefix.trim() });
     const res = await fetch(`${API_URL}/api/suggestions?${qs.toString()}`, {

@@ -31,3 +31,6 @@ _*.mjs
 _*.txt
 _result.json
 server/probe_*.mjs
+
+.vercel
+.env*
