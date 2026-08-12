@@ -1,0 +1,33 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+
+# Env
+*.local
+.env
+.env.*
+!.env.example
+
+# Build cache (TypeScript)
+*.tsbuildinfo
+
+# Scratch / pruebas locales de desarrollo
+aa
+_*.mjs
+_*.txt
+_result.json
+server/probe_*.mjs
