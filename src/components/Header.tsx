@@ -7,6 +7,8 @@ interface Props {
   onQueryChange: (q: string) => void;
   /** Ejecuta la búsqueda con el texto actual. */
   onSearch: () => void;
+  /** Limpia el texto del buscador y vuelve al estado inicial. */
+  onClearSearch: () => void;
   sort: SortOption;
   onSortChange: (sort: SortOption) => void;
   onlyDiscounted: boolean;
@@ -33,6 +35,7 @@ export default function Header({
   query,
   onQueryChange,
   onSearch,
+  onClearSearch,
   sort,
   onSortChange,
   onlyDiscounted,
@@ -68,7 +71,7 @@ export default function Header({
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                 <input
-                  type="search"
+                  type="text"
                   value={query}
                   onChange={(e) => onQueryChange(e.target.value)}
                   onKeyDown={handleEnter}
@@ -78,10 +81,7 @@ export default function Header({
                 {query && (
                   <button
                     type="button"
-                    onClick={() => {
-                      onQueryChange('');
-                      onSearch();
-                    }}
+                    onClick={onClearSearch}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     aria-label="Limpiar búsqueda"
                   >

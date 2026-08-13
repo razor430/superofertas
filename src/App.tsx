@@ -20,14 +20,18 @@ export default function App() {
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
 
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Debounce para la búsqueda en vivo mientras se escribe.
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Indica si el usuario ya disparó una búsqueda. En el estado inicial (sin
+  // buscar) se muestra el mensaje "usá el buscador" en lugar de resultados.
+  const [searched, setSearched] = useState(false);
 
   // Contador para descartar respuestas obsoletas (protección ante carreras).
   const requestId = useRef(0);
+
+  // Permite que el efecto de filtros no dispare una búsqueda en el primer
+  // render (queremos que la página cargue SIN resultados, mostrando el aviso).
+  const firstRender = useRef(true);
 
   /** Ejecuta la búsqueda con todos los filtros vigentes. */
   const runSearch = useCallback(
@@ -36,6 +40,7 @@ export default function App() {
       requestId.current = current;
       setLoading(true);
       setError(null);
+      setSearched(true);
       try {
         const result = await searchProducts({
           query: overrides.query ?? query,
@@ -58,26 +63,15 @@ export default function App() {
     [query, supermarketIds, sort, onlyDiscounted, maxPrice],
   );
 
-  // Búsqueda inicial al montar.
+  // La búsqueda NO se dispara al escribir ni al montar: solo al presionar
+  // "Buscar" (botón o Enter) o al cambiar un filtro. Por eso no hay debounce
+  // del texto. Además, en el primer render tampoco se busca, para que la
+  // página cargue mostrando el aviso "usá el buscador".
   useEffect(() => {
-    runSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Búsqueda en vivo: debounce de 300 ms mientras se escribe el texto.
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      runSearch({ query });
-    }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
-
-  // Re-búsqueda cuando cambian los filtros que no dependen del texto.
-  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     runSearch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supermarketIds, sort, onlyDiscounted, maxPrice]);
@@ -88,6 +82,17 @@ export default function App() {
     setSort('relevance');
     setOnlyDiscounted(false);
     setMaxPrice(undefined);
+    setSearched(false);
+    setProducts([]);
+    setError(null);
+  };
+
+  /** Limpia solo el texto del buscador y vuelve al estado inicial sin resultados. */
+  const clearSearch = () => {
+    setQuery('');
+    setSearched(false);
+    setProducts([]);
+    setError(null);
   };
   return (
     <div className="min-h-screen bg-slate-50">
@@ -95,6 +100,7 @@ export default function App() {
         query={query}
         onQueryChange={setQuery}
         onSearch={() => runSearch({ query })}
+        onClearSearch={clearSearch}
         sort={sort}
         onSortChange={setSort}
         onlyDiscounted={onlyDiscounted}
@@ -168,6 +174,7 @@ export default function App() {
             <ProductGrid
               products={products}
               loading={loading}
+              searched={searched}
               onRetry={clearFilters}
             />
           </div>

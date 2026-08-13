@@ -5,6 +5,8 @@ import ProductCard from './ProductCard';
 interface Props {
   products: Product[];
   loading: boolean;
+  /** Indica si el usuario ya ejecutó una búsqueda (para mostrar el aviso inicial). */
+  searched: boolean;
   onRetry: () => void;
 }
 
@@ -32,8 +34,31 @@ function ProductCardSkeleton() {
 export default function ProductGrid({
   products,
   loading,
+  searched,
   onRetry,
 }: Props) {
+  // Antes de la primera búsqueda no se muestran resultados: se invita a usar el
+  // buscador (no hay productos ni skeletons en la carga inicial).
+  if (!searched) {
+    return (
+      <section className="w-full">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white py-20 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+            <SearchX className="h-7 w-7 text-amber-500" />
+          </div>
+          <h3 className="mt-4 text-base font-semibold text-slate-800">
+            Buscá tus ofertas
+          </h3>
+          <p className="mt-1 max-w-md px-4 text-sm text-slate-500">
+            Escribí un producto, marca o categoría y presioná{' '}
+            <strong className="font-medium text-slate-700">Buscar</strong> (o
+            Enter) para ver el mejor precio de la semana en los supermercados.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="w-full">
       {/* Barra de herramientas: contador + ordenamiento */}
